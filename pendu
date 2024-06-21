@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jeu du Pendu</title>
+    <style>
+        body {
+            font-family: 'Helvetica', sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background-color: #f0f0f0;
+        }
+        #game {
+            text-align: center;
+        }
+        #word {
+            font-size: 24px;
+            letter-spacing: 5px;
+        }
+        #pendu {
+            font-size: 18px;
+            color: #000;
+            margin: 20px 0;
+            white-space: pre; /* Preserve spaces and new lines */
+        }
+        #message {
+            margin: 20px 0;
+            color: red;
+        }
+        input {
+            font-size: 18px;
+            padding: 5px;
+            margin-right: 10px;
+        }
+        button {
+            font-size: 18px;
+            padding: 5px 10px;
+        }
+    </style>
+</head>
+<body>
+
+<div id="game">
+    <div id="word">_ _ _ _ _</div>
+    <p> </p>
+    <input type="text" id="guess" maxlength="1">
+    <button onclick="makeGuess()">Deviner</button>
+    <pre id="pendu">Bravo ! Sans être pendu</pre>
+    <div id="message"></div>
+</div>
+
+<script>
+    let words = ['CHIEN', 'CHAT', 'LION', 'TIGRE', 'ELEPHANT'];
+    let word = words[Math.floor(Math.random() * words.length)];
+    let guesses = '';
+    let errors = 0;
+
+    function updateDisplay() {
+        let displayWord = word.split('').map(c => guesses.includes(c) ? c : '_').join(' ');
+        document.getElementById('word').innerText = displayWord;
+        if (!displayWord.includes('_')) {
+            alert('Vous avez gagné!');
+            resetGame();
+        } else if (errors >= 8) {
+            alert(`Vous avez perdu! Le mot était: ${word}`);
+            resetGame();
+        }
+    }
+
+    function makeGuess() {
+        let input = document.getElementById('guess').value.toUpperCase();
+        document.getElementById('guess').value = '';
+        if (input.length !== 1 || !/[A-Z]/.test(input) || guesses.includes(input)) {
+            document.getElementById('message').innerText = 'Entrez une seule lettre.';
+            return;
+        }
+        document.getElementById('message').innerText = '';
+        guesses += input;
+        if (!word.includes(input)) {
+            errors++;
+            updatePendu();
+        }
+        updateDisplay();
+    }
+
+    function updatePendu() {
+        let stages = [
+            "Bravo ! Sans être pendu",
+            "\n\n\n\n\n\n\n¯¯¯¯¯¯",
+            " \n  | \n  | \n  | \n  | \n  | \n  | \n¯¯¯¯¯¯",
+            "_____________ \n  |           \n  |           \n  |           \n  |           \n  |           \n  |           \n¯¯¯¯¯¯",
+            "_____________ \n  | /      |  \n  |           \n  |           \n  |           \n  |           \n  |           \n¯¯¯¯¯¯",
+            "_____________ \n  | /      |  \n  |        0  \n  |           \n  |           \n  |           \n  |           \n¯¯¯¯¯¯",
+            "_____________ \n  | /      |  \n  |        0  \n  |       /|\\ \n  |           \n  |           \n  |           \n¯¯¯¯¯¯",
+            "_____________ \n  | /      |  \n  |        0  \n  |       /|\\ \n  |        |  \n  |           \n  |           \n¯¯¯¯¯¯",
+            "_____________ \n  | /      |  \n  |        0  \n  |       /|\\ \n  |        |  \n  |       / \ \n  |           \n¯¯¯¯¯¯"
+        ];
+        document.getElementById('pendu').innerText = stages[errors];
+    }
+
+    function resetGame() {
+        word = words[Math.floor(Math.random() * words.length)];
+        guesses = '';
+        errors = 0;
+        updateDisplay();
+        updatePendu();
+    }
+
+    updateDisplay();
+</script>
+
+</body>
+</html>
