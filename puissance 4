@@ -1,0 +1,137 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Connect 4</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: #17161b;
+            color: #fff;
+            font-family: Arial, sans-serif;
+        }
+        #presentation {
+            width: 350px;
+            height: 50px;
+            text-align: center;
+            font-size: 12px;
+            padding: 20px;
+            background-color: #17161b;
+        }
+        #board {
+            display: grid;
+            grid-template-rows: repeat(6, 100px);
+            grid-template-columns: repeat(7, 100px);
+            gap: 5px;
+            background-color: blue;
+            padding: 5px;
+            border: 5px solid blue;
+        }
+        .cell {
+            width: 90px;
+            height: 90px;
+            border-radius: 50%;
+            background-color: white;
+        }
+    </style>
+</head>
+<body>
+    <div id="presentation">rouge ou yellow</div>
+    <div id="board"></div>
+    <script>
+        const ROWS = 6;
+        const COLS = 7;
+        const EMPTY = 0;
+        const PLAYER1 = 1;
+        const PLAYER2 = 2;
+        const COLORS = { [EMPTY]: "white", [PLAYER1]: "red", [PLAYER2]: "yellow" };
+
+        let current_player = PLAYER1;
+        let board = Array.from({ length: ROWS }, () => Array(COLS).fill(EMPTY));
+
+        const presentation = document.getElementById('presentation');
+        const boardDiv = document.getElementById('board');
+
+        function createBoard() {
+            boardDiv.innerHTML = '';
+            for (let r = 0; r < ROWS; r++) {
+                for (let c = 0; c < COLS; c++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'cell';
+                    cell.style.backgroundColor = COLORS[board[r][c]];
+                    cell.dataset.row = r;
+                    cell.dataset.col = c;
+                    cell.addEventListener('click', handleClick);
+                    boardDiv.appendChild(cell);
+                }
+            }
+        }
+
+        function handleClick(event) {
+            const col = event.target.dataset.col;
+            const row = findNextOpenRow(col);
+            if (row !== null) {
+                board[row][col] = current_player;
+                if (checkWinner(row, col)) {
+                    alert(`Player ${current_player === PLAYER1 ? "Red" : "Yellow"} wins!`);
+                    resetGame();
+                } else {
+                    current_player = current_player === PLAYER1 ? PLAYER2 : PLAYER1;
+                    updatePresentation();
+                }
+                createBoard();
+            }
+        }
+
+        function findNextOpenRow(col) {
+            for (let r = ROWS - 1; r >= 0; r--) {
+                if (board[r][col] === EMPTY) {
+                    return r;
+                }
+            }
+            return null;
+        }
+
+        function checkWinner(row, col) {
+            return checkDirection(row, col, 1, 0) ||
+                   checkDirection(row, col, 0, 1) ||
+                   checkDirection(row, col, 1, 1) ||
+                   checkDirection(row, col, 1, -1);
+        }
+
+        function checkDirection(row, col, dr, dc) {
+            let count = 0;
+            for (let i = -3; i <= 3; i++) {
+                const r = parseInt(row) + i * dr;
+                const c = parseInt(col) + i * dc;
+                if (r >= 0 && r < ROWS && c >= 0 && c < COLS && board[r][c] === current_player) {
+                    count++;
+                    if (count === 4) return true;
+                } else {
+                    count = 0;
+                }
+            }
+            return false;
+        }
+
+        function resetGame() {
+            board = Array.from({ length: ROWS }, () => Array(COLS).fill(EMPTY));
+            current_player = PLAYER1;
+            updatePresentation();
+            createBoard();
+        }
+
+        function updatePresentation() {
+            presentation.textContent = current_player === PLAYER1 ? "Tour des rouges" : "Tour des jaunes";
+        }
+
+        createBoard();
+        updatePresentation();
+    </script>
+</body>
+</html>
+
