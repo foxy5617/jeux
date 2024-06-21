@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pong Game</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #17161b;
+            color: #fff;
+            font-family: Arial, sans-serif;
+        }
+        canvas {
+            background-color: black;
+        }
+        #score {
+            position: absolute;
+            top: 10px;
+            text-align: center;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+    <div id="score">Score <br> rouge: 0 | bleu: 0</div>
+    <canvas id="pongCanvas" width="800" height="600"></canvas>
+    <script>
+        const canvas = document.getElementById("pongCanvas");
+        const context = canvas.getContext("2d");
+
+        let scoreJoueur1 = 0;
+        let scoreJoueur2 = 0;
+
+        let ball = {
+            x: canvas.width / 2,
+            y: canvas.height / 2,
+            radius: 10,
+            speed: 4,
+            velocityX: 3,
+            velocityY: 3,
+            color: "white"
+        };
+
+        let paddle1 = {
+            x: 10,
+            y: canvas.height / 2 - 50,
+            width: 10,
+            height: 100,
+            color: "red",
+            dy: 0
+        };
+
+        let paddle2 = {
+            x: canvas.width - 20,
+            y: canvas.height / 2 - 50,
+            width: 10,
+            height: 100,
+            color: "blue",
+            dy: 0
+        };
+
+        function drawRect(x, y, w, h, color) {
+            context.fillStyle = color;
+            context.fillRect(x, y, w, h);
+        }
+
+        function drawCircle(x, y, r, color) {
+            context.fillStyle = color;
+            context.beginPath();
+            context.arc(x, y, r, 0, Math.PI * 2, false);
+            context.closePath();
+            context.fill();
+        }
+
+        function update() {
+            ball.x += ball.velocityX;
+            ball.y += ball.velocityY;
+
+            // Ball collision with top and bottom walls
+            if (ball.y + ball.radius > canvas.height || ball.y - ball.radius < 0) {
+                ball.velocityY = -ball.velocityY;
+            }
+
+            // Ball collision with paddles
+            if (ball.x - ball.radius < paddle1.x + paddle1.width && ball.y > paddle1.y && ball.y < paddle1.y + paddle1.height) {
+                ball.velocityX = -ball.velocityX;
+            }
+            if (ball.x + ball.radius > paddle2.x && ball.y > paddle2.y && ball.y < paddle2.y + paddle2.height) {
+                ball.velocityX = -ball.velocityX;
+            }
+
+            // Ball collision with left and right walls
+            if (ball.x + ball.radius < 0) {
+                scoreJoueur2++;
+                resetBall();
+            }
+            if (ball.x - ball.radius > canvas.width) {
+                scoreJoueur1++;
+                resetBall();
+            }
+
+            // Update paddle positions
+            paddle1.y += paddle1.dy;
+            paddle2.y += paddle2.dy;
+
+            // Paddle boundary restrictions
+            if (paddle1.y < 0) paddle1.y = 0;
+            if (paddle1.y + paddle1.height > canvas.height) paddle1.y = canvas.height - paddle1.height;
+            if (paddle2.y < 0) paddle2.y = 0;
+            if (paddle2.y + paddle2.height > canvas.height) paddle2.y = canvas.height - paddle2.height;
+
+            // Update score display
+            document.getElementById("score").innerHTML = `Score <br> rouge: ${scoreJoueur1} | bleu: ${scoreJoueur2}`;
+        }
+
+        function resetBall() {
+            ball.x = canvas.width / 2;
+            ball.y = canvas.height / 2;
+            ball.velocityX = -ball.velocityX;
+        }
+
+        function draw() {
+            drawRect(0, 0, canvas.width, canvas.height, "black");
+            drawRect(paddle1.x, paddle1.y, paddle1.width, paddle1.height, paddle1.color);
+            drawRect(paddle2.x, paddle2.y, paddle2.width, paddle2.height, paddle2.color);
+            drawCircle(ball.x, ball.y, ball.radius, ball.color);
+        }
+
+        function game() {
+            update();
+            draw();
+        }
+
+        document.addEventListener("keydown", (event) => {
+            switch (event.key) {
+                case 'x':
+                    paddle1.dy = 6;
+                    break;
+                case 's':
+                    paddle1.dy = -6;
+                    break;
+                case 'ArrowUp':
+                    paddle2.dy = -6;
+                    break;
+                case 'ArrowDown':
+                    paddle2.dy = 6;
+                    break;
+            }
+        });
+
+        document.addEventListener("keyup", (event) => {
+            switch (event.key) {
+                case 's':
+                case 'x':
+                    paddle1.dy = 0;
+                    break;
+                case 'ArrowUp':
+                case 'ArrowDown':
+                    paddle2.dy = 0;
+                    break;
+            }
+        });
+
+        setInterval(game, 30);
+    </script>
+</body>
+</html>
